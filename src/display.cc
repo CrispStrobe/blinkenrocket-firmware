@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 by Birte Kristina Friesel
+ * patched for Common Cathode (AS) display type by Patrick Schwarz, 2025-09-18
  *
  * License: You may use, redistribute and/or modify this file under the terms
  * of either:
@@ -55,7 +56,12 @@ void Display::multiplex()
 	 */
 	PORTB = 0;
 	PORTD = disp_buf[active_col];
+	
+	#ifdef INVERTED
+	PORTB = ~_BV(active_col);
+	#else
 	PORTB = _BV(active_col);
+	#endif
 
 	if (++active_col == 8) {
 		active_col = 0;
@@ -109,21 +115,41 @@ void Display::update() {
 				 */
 				if (current_anim->direction == 0) {
 					if (char_pos == 0) {
+						#ifdef INVERTED
+						disp_buf[7] = 0x00; // whitespace
+						#else
 						disp_buf[7] = 0xff; // whitespace
+						#endif
 					} else {
+						#ifdef INVERTED
+						disp_buf[7] = pgm_read_byte(&glyph_addr[char_pos]);
+						#else
 						disp_buf[7] = ~pgm_read_byte(&glyph_addr[char_pos]);
+						#endif
 					}
 				} else {
 					if (char_pos == 0) {
+						#ifdef INVERTED
+						disp_buf[0] = 0x00; // whitespace
+						#else
 						disp_buf[0] = 0xff; // whitespace
+						#endif
 					} else {
+						#ifdef INVERTED
+						disp_buf[0] = pgm_read_byte(&glyph_addr[glyph_len - char_pos + 1]);
+						#else
 						disp_buf[0] = ~pgm_read_byte(&glyph_addr[glyph_len - char_pos + 1]);
+						#endif
 					}
 				}
 
 			} else if (current_anim->type == AnimationType::FRAMES) {
 				for (i = 0; i < 8; i++) {
+					#ifdef INVERTED
+					disp_buf[i] = current_anim->data[str_pos+i];
+					#else
 					disp_buf[i] = ~current_anim->data[str_pos+i];
+					#endif
 				}
 				str_pos += 8;
 			}
