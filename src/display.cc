@@ -1,6 +1,5 @@
 /*
  * Copyright (C) 2016 by Birte Kristina Friesel
- * patched for Common Cathode (AS) display type by Patrick Schwarz, 2025-09-18
  *
  * License: You may use, redistribute and/or modify this file under the terms
  * of either:
@@ -32,7 +31,13 @@ Display::Display()
 void Display::disable()
 {
 	TIMSK0 &= ~_BV(TOIE0);
+	
+	#ifdef INVERTED
+	PORTB = 0xFF;
+	#else
 	PORTB = 0;
+	#endif
+	
 	PORTD = 0;
 }
 
@@ -54,7 +59,12 @@ void Display::multiplex()
 	 * To avoid flickering, do not put any code (or expensive index
 	 * calculations) between the following three lines.
 	 */
+	#ifdef INVERTED
+	PORTB = 0xFF;
+	#else
 	PORTB = 0;
+	#endif
+	
 	PORTD = disp_buf[active_col];
 	
 	#ifdef INVERTED
@@ -248,8 +258,15 @@ void Display::update() {
 
 void Display::reset()
 {
-	for (uint8_t i = 0; i < 8; i++)
+	for (uint8_t i = 0; i < 8; i++) {
+		#ifdef INVERTED
+		disp_buf[i] = 0x00;
+		#else
 		disp_buf[i] = 0xff;
+		#endif
+	}
+	
+		
 	update_cnt = 0;
 	repeat_cnt = 0;
 	str_pos = 0;
