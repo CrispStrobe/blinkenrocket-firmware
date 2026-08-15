@@ -65,7 +65,11 @@ void Display::multiplex()
 	PORTB = 0;
 	#endif
 	
+	#ifdef INVERTED
+	PORTD = ~disp_buf[active_col]; /* 788AS: rows are active-HIGH */
+	#else
 	PORTD = disp_buf[active_col];
+	#endif
 	
 	#ifdef INVERTED
 	PORTB = ~_BV(active_col);
@@ -125,41 +129,21 @@ void Display::update() {
 				 */
 				if (current_anim->direction == 0) {
 					if (char_pos == 0) {
-						#ifdef INVERTED
-						disp_buf[7] = 0x00; // whitespace
-						#else
 						disp_buf[7] = 0xff; // whitespace
-						#endif
 					} else {
-						#ifdef INVERTED
-						disp_buf[7] = pgm_read_byte(&glyph_addr[char_pos]);
-						#else
 						disp_buf[7] = ~pgm_read_byte(&glyph_addr[char_pos]);
-						#endif
 					}
 				} else {
 					if (char_pos == 0) {
-						#ifdef INVERTED
-						disp_buf[0] = 0x00; // whitespace
-						#else
 						disp_buf[0] = 0xff; // whitespace
-						#endif
 					} else {
-						#ifdef INVERTED
-						disp_buf[0] = pgm_read_byte(&glyph_addr[glyph_len - char_pos + 1]);
-						#else
 						disp_buf[0] = ~pgm_read_byte(&glyph_addr[glyph_len - char_pos + 1]);
-						#endif
 					}
 				}
 
 			} else if (current_anim->type == AnimationType::FRAMES) {
 				for (i = 0; i < 8; i++) {
-					#ifdef INVERTED
-					disp_buf[i] = current_anim->data[str_pos+i];
-					#else
 					disp_buf[i] = ~current_anim->data[str_pos+i];
-					#endif
 				}
 				str_pos += 8;
 			}
@@ -259,11 +243,7 @@ void Display::update() {
 void Display::reset()
 {
 	for (uint8_t i = 0; i < 8; i++) {
-		#ifdef INVERTED
-		disp_buf[i] = 0x00;
-		#else
 		disp_buf[i] = 0xff;
-		#endif
 	}
 	
 		
