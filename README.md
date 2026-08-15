@@ -1,5 +1,29 @@
-# firmware
-Firmware for blinkenrocket, V2.0
+# firmware — AS-display fork with minigame
+
+Firmware for blinkenrocket, V2.x. This fork (branch `minigame-as`) adds:
+
+* **AS-panel support** (`make INVERTED=1`): boards fitted with a 788AS /
+  1088AS matrix (column active-LOW, row active-HIGH — e.g. board v2.5
+  with a 788AS) instead of the stock BS panel. The inversion happens
+  ONCE, in the multiplex ISR's PORTD write, so every content path —
+  text, animations, static patterns, the minigame — is correct without
+  per-writer patches.
+* **The robust minigame** (v2.2 work, previously uncommitted): a
+  Pong-style game plus a hardened modem RX state machine with watchdog.
+
+Both verified in simulation before flashing (BrickWright's avr8js
+ATtiny88 target with a polarity-true 788AS panel model): the boot
+pattern renders pixel-identical to stock-on-BS, and the game court
+draws with the paddle after a RIGHT press.
+
+```sh
+make INVERTED=1 && sudo make INVERTED=1 program   # AS panel (788AS/1088AS)
+make && sudo make program                          # stock BS panel
+```
+
+Flashing the wrong variant shows a uniform dim glow instead of a
+pattern (7 of 8 columns selected at once) — that is the symptom, not a
+dead board.
 
 Modifications for V2.0 (sine-wave-based transmission and ADC/sampling) 
 by Chris Veigl, Overflo, Chris Hager 
