@@ -279,3 +279,13 @@ ISR(TIMER0_OVF_vect)
 {
 	display.multiplex();
 }
+
+void Display::drawFrame(uint8_t *frame)
+{
+    for (uint8_t i = 0; i < 8; i++) {
+        // Directly copy the prepared frame to the display's private buffer.
+        // This bypasses the inversion (~) and pointer advancement (str_pos)
+        // of the normal display.update() function.
+        disp_buf[i] = frame[i];
+    }
+}

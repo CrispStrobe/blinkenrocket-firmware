@@ -230,6 +230,8 @@ class Display {
 		 *        so anim has to be kept in memory until a new one is loaded
 		 */
 		void show(animation_t *anim);
+
+		void drawFrame(uint8_t *frame);
 };
 
 extern Display display;

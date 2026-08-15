@@ -92,6 +92,26 @@ class System {
 			BUTTON_BOTH = 3
 		};
 
+		enum SystemMode : uint8_t {
+			NORMAL,
+			GAME_MODE
+		};
+
+		struct GameState {
+			uint8_t player_pos;      // Player paddle position (0-5)
+			uint8_t ai_pos;          // AI paddle position (0-5)
+			int8_t ball_x;           // Ball X position (0-7)
+			int8_t ball_y;           // Ball Y position (0-7)
+			int8_t ball_vx;          // Ball X velocity (-1 or 1)
+			int8_t ball_vy;          // Ball Y velocity (-1 or 1)
+			uint8_t player_score;
+			uint8_t ai_score;
+			uint8_t update_counter;  // For game speed control
+			uint8_t score_display_counter;
+			bool showing_score;
+			uint8_t frame[8]; // A dedicated buffer for the game's display frame
+		};
+
 		enum RxExpect : uint8_t {
 			START1,
 			START2,
@@ -109,8 +129,30 @@ class System {
 		RxExpect rxExpect;
 		ButtonMask btnMask;
 
+		// for pong game mode:
+
+		SystemMode current_mode;
+		GameState game;
+		uint8_t game_debounce;
+
+		void enterGameMode(void);
+		void runGameMode(void);
+		void exitGameMode(void);
+		void updateGame(void);
+		void updateAI(void);
+		void resetBall(bool player_scored);
+		void displayScore(void);
+
 	public:
-		System() { want_shutdown = 0; rxExpect = START1; current_anim_no = 0; btnMask = BUTTON_NONE; btn_debounce = 0;};
+		System() { 
+			want_shutdown = 0; 
+			rxExpect = START1; 
+			current_anim_no = 0; 
+			btnMask = BUTTON_NONE; 
+			btn_debounce = 0;
+			current_mode = NORMAL;
+			game_debounce = 0;
+		};
 
 		/**
 		 * Initial MCU setup. Turns off unused peripherals to save power
